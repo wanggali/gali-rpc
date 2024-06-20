@@ -17,12 +17,7 @@ public class VertxHttpServer implements HttpServer {
         io.vertx.core.http.HttpServer httpServer = vertx.createHttpServer();
 
         //监听端口并处理
-        httpServer.requestHandler(request -> {
-
-            request.response()
-                    .putHeader("Content-Type", "text/plain")
-                    .end("Hello");
-        });
+        httpServer.requestHandler(new HttpServerHandler());
 
         //启动并监听端口
         httpServer.listen(port, res -> {
@@ -34,11 +29,5 @@ public class VertxHttpServer implements HttpServer {
         });
 
 
-    }
-
-
-    public static void main(String[] args) {
-        VertxHttpServer vertxHttpServer = new VertxHttpServer();
-        vertxHttpServer.doStart(8080);
     }
 }

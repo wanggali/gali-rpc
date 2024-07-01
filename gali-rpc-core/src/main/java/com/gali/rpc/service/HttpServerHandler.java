@@ -1,9 +1,13 @@
 package com.gali.rpc.service;
 
+import com.gali.rpc.GaliRpcApplication;
+import com.gali.rpc.config.RpcConfig;
 import com.gali.rpc.model.GaliRpcRequest;
 import com.gali.rpc.model.GaliRpcResponse;
 import com.gali.rpc.register.LocalRegister;
 import com.gali.rpc.serializer.JdkSerializer;
+import com.gali.rpc.serializer.Serializer;
+import com.gali.rpc.serializer.SerializerFactory;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerRequest;
@@ -25,7 +29,8 @@ public class HttpServerHandler implements Handler<HttpServerRequest> {
     @Override
     public void handle(HttpServerRequest httpServerRequest) {
         //指定序列化
-        JdkSerializer jdkSerializer = new JdkSerializer();
+        RpcConfig rpcConfig = GaliRpcApplication.getRpcConfig();
+        Serializer jdkSerializer = SerializerFactory.getInstance(rpcConfig.getSerializer());
 
         //记录日志
         System.out.println("received request " + httpServerRequest.method() + "" + httpServerRequest.uri());
@@ -63,7 +68,7 @@ public class HttpServerHandler implements Handler<HttpServerRequest> {
         });
     }
 
-    private void doResponse(HttpServerRequest request, GaliRpcResponse galiRpcResponse, JdkSerializer jdkSerializer) {
+    private void doResponse(HttpServerRequest request, GaliRpcResponse galiRpcResponse, Serializer jdkSerializer) {
         HttpServerResponse response = request.response().putHeader("content-type", "application/json");
         try {
             byte[] serialize = jdkSerializer.serialize(galiRpcResponse);

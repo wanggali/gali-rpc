@@ -1,5 +1,6 @@
 package com.gali.rpc.config;
 
+import com.gali.rpc.serializer.SerializeKeys;
 import lombok.Data;
 
 /**
@@ -29,4 +30,14 @@ public class RpcConfig {
      * 服务器端口号
      */
     private Integer port = 8080;
+
+    /**
+     * 模拟调用
+     */
+    private boolean mock = false;
+
+    /**
+     * 序列化器
+     */
+    private String serializer = SerializeKeys.JDK;
 }

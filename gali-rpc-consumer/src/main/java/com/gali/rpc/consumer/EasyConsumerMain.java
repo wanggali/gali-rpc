@@ -22,5 +22,9 @@ public class EasyConsumerMain {
         } else {
             System.out.println(gali.getName());
         }
+
+        UserService userMockService = ServiceProxyFactory.getMockServiceProxy(UserService.class);
+
+        System.out.println(userMockService.getDefaultValue());
     }
 }

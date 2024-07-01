@@ -1,0 +1,4 @@
+jdk=com.gali.rpc.serializer.JdkSerializer
+hessian=com.gali.rpc.serializer.HessianSerializer
+json=com.gali.rpc.serializer.JsonSerializer
+kryo=com.gali.rpc.serializer.KryoSerializer

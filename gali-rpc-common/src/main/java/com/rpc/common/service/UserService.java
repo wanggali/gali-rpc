@@ -11,4 +11,8 @@ import com.rpc.common.model.User;
 public interface UserService {
 
     User getUserName(String userName);
+
+    default Integer getDefaultValue() {
+        return 1;
+    }
 }

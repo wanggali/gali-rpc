@@ -1,0 +1,2 @@
+etcd=com.gali.rpc.register.EtcdRegistry
+zookeeper=com.gali.rpc.register.ZooKeeperRegistry

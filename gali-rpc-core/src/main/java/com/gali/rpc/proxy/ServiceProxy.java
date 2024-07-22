@@ -15,6 +15,8 @@ import com.gali.rpc.register.RegistryFactory;
 import com.gali.rpc.serializer.JdkSerializer;
 import com.gali.rpc.serializer.Serializer;
 import com.gali.rpc.serializer.SerializerFactory;
+import io.vertx.core.Vertx;
+import io.vertx.core.net.NetClient;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -59,19 +61,26 @@ public class ServiceProxy implements InvocationHandler {
 
         ServiceMetaInfo discoveryServiceMetaInfo = serviceMetaInfos.get(0);
 
-        try {
-            byte[] serialize = jdkSerializer.serialize(request);
-            //发送请求
-            HttpResponse execute = HttpRequest.post(discoveryServiceMetaInfo.getServiceAddress())
-                    .body(serialize)
-                    .execute();
-            byte[] bytes = execute.bodyBytes();
-            GaliRpcResponse deserialize = jdkSerializer.deserialize(bytes, GaliRpcResponse.class);
-            execute.close();
-            return deserialize.getData();
-        } catch (Exception e) {
-            log.error("proxy error", e);
-        }
+        //发送tcp请求
+        Vertx vertx = Vertx.vertx();
+        NetClient netClient = vertx.createNetClient();
+
+
+
+
+//        try {
+//            byte[] serialize = jdkSerializer.serialize(request);
+//            //发送请求
+//            HttpResponse execute = HttpRequest.post(discoveryServiceMetaInfo.getServiceAddress())
+//                    .body(serialize)
+//                    .execute();
+//            byte[] bytes = execute.bodyBytes();
+//            GaliRpcResponse deserialize = jdkSerializer.deserialize(bytes, GaliRpcResponse.class);
+//            execute.close();
+//            return deserialize.getData();
+//        } catch (Exception e) {
+//            log.error("proxy error", e);
+//        }
         return null;
     }
 }

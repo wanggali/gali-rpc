@@ -7,6 +7,12 @@ import com.gali.rpc.GaliRpcApplication;
 import com.gali.rpc.config.RegistryConfig;
 import com.gali.rpc.config.RpcConfig;
 import com.gali.rpc.constant.RpcConstant;
+import com.gali.rpc.fault.retry.RetryStrategy;
+import com.gali.rpc.fault.retry.RetryStrategyFactory;
+import com.gali.rpc.fault.tolerant.TolerantStrategy;
+import com.gali.rpc.fault.tolerant.TolerantStrategyFactory;
+import com.gali.rpc.loadbalancer.LoadBalancer;
+import com.gali.rpc.loadbalancer.LoadBalancerFactory;
 import com.gali.rpc.model.GaliRpcRequest;
 import com.gali.rpc.model.GaliRpcResponse;
 import com.gali.rpc.model.ServiceMetaInfo;
@@ -15,6 +21,7 @@ import com.gali.rpc.register.RegistryFactory;
 import com.gali.rpc.serializer.JdkSerializer;
 import com.gali.rpc.serializer.Serializer;
 import com.gali.rpc.serializer.SerializerFactory;
+import com.gali.rpc.service.tcp.VertxTcpClient;
 import io.vertx.core.Vertx;
 import io.vertx.core.net.NetClient;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +29,9 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * ServiceProxy: JDK代理
@@ -55,18 +64,27 @@ public class ServiceProxy implements InvocationHandler {
         serviceMetaInfo.setServiceVersion(RpcConstant.DEFAULT_SERVICE_VERSION);
 
         List<ServiceMetaInfo> serviceMetaInfos = registry.serviceDiscovery(serviceMetaInfo.getServiceKey());
-        if (CollectionUtil.isEmpty(serviceMetaInfos)){
+        if (CollectionUtil.isEmpty(serviceMetaInfos)) {
             throw new RuntimeException("No service discovery");
         }
 
-        ServiceMetaInfo discoveryServiceMetaInfo = serviceMetaInfos.get(0);
+        // 负载均衡
+        LoadBalancer loadBalancer = LoadBalancerFactory.getInstance(rpcConfig.getLoadBalancer());
+        // 将调用方法名（请求路径）作为负载均衡参数
+        Map<String, Object> requestParams = new HashMap<>();
+        requestParams.put("methodName", request.getMethodName());
+        ServiceMetaInfo discoveryServiceMetaInfo = loadBalancer.select(requestParams, serviceMetaInfos);
 
-        //发送tcp请求
-        Vertx vertx = Vertx.vertx();
-        NetClient netClient = vertx.createNetClient();
-
-
-
+        GaliRpcResponse galiRpcResponse = null;
+        try {
+            RetryStrategy retryStrategy = RetryStrategyFactory.getInstance(rpcConfig.getRetryStrategy());
+            galiRpcResponse = retryStrategy.doRetry(() -> VertxTcpClient.doRequest(request, discoveryServiceMetaInfo));
+        } catch (Exception e) {
+            //容错机制
+            TolerantStrategy tolerantStrategy = TolerantStrategyFactory.getInstance(rpcConfig.getTolerantStrategy());
+            galiRpcResponse = tolerantStrategy.doTolerant(null, e);
+        }
+        return galiRpcResponse.getData();
 
 //        try {
 //            byte[] serialize = jdkSerializer.serialize(request);
@@ -81,6 +99,5 @@ public class ServiceProxy implements InvocationHandler {
 //        } catch (Exception e) {
 //            log.error("proxy error", e);
 //        }
-        return null;
     }
 }

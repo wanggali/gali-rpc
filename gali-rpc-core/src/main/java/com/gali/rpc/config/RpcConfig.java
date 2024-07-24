@@ -1,5 +1,8 @@
 package com.gali.rpc.config;
 
+import com.gali.rpc.fault.retry.RetryStrategyKeys;
+import com.gali.rpc.fault.tolerant.TolerantStrategyKeys;
+import com.gali.rpc.loadbalancer.LoadBalancerKeys;
 import com.gali.rpc.serializer.SerializeKeys;
 import lombok.Data;
 
@@ -45,4 +48,19 @@ public class RpcConfig {
      * 注册中心
      */
     private RegistryConfig registryConfig = new RegistryConfig();
+
+    /**
+     * 负载均衡
+     */
+    private String loadBalancer = LoadBalancerKeys.ROUND_ROBIN;
+
+    /**
+     * 重试策略
+     */
+    private String retryStrategy = RetryStrategyKeys.NO;
+
+    /**
+     * 容错策略
+     */
+    private String tolerantStrategy = TolerantStrategyKeys.FAIL_FAST;
 }

@@ -1,0 +1,2 @@
+no=com.gali.rpc.fault.retry.NoRetryStrategy
+fixedInterval=com.gali.rpc.fault.retry.FixedIntervalRetryStrategy

@@ -1,0 +1,4 @@
+failBack=com.gali.rpc.fault.tolerant.FailBackTolerantStrategy
+failFast=com.gali.rpc.fault.tolerant.FailFastTolerantStrategy
+failOver=com.gali.rpc.fault.tolerant.FailOverTolerantStrategy
+failSafe=com.gali.rpc.fault.tolerant.FailSafeTolerantStrategy
